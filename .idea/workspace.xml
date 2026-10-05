@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b5aa6d6e-6def-4d1d-ab6e-6c97771f3052" name="Changes" comment="не готово есчё">
+    <list default="true" id="b5aa6d6e-6def-4d1d-ab6e-6c97771f3052" name="Changes" comment="lab2 work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Delivery.py" beforeDir="false" afterPath="$PROJECT_DIR$/Delivery.py" afterDir="false" />
     </list>
@@ -52,18 +52,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python tests.Python tests in lab2.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lab1.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lab2.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Lab__2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests in lab2.py.executor": "Run",
+    "Python.Delivery.executor": "Run",
+    "Python.lab1.executor": "Run",
+    "Python.lab2.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Lab__2"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="lab2" type="PythonConfigurationType" factoryName="Python">
       <option name="ENV_FILES" value="" />
@@ -79,7 +80,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/lab2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Delivery.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -120,7 +121,15 @@
       <option name="project" value="LOCAL" />
       <updated>1790572276601</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="lab2 work">
+      <option name="closed" value="true" />
+      <created>1791176947233</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1791176947233</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -137,6 +146,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="вроде работает" />
     <MESSAGE value="не готово есчё" />
-    <option name="LAST_COMMIT_MESSAGE" value="не готово есчё" />
+    <MESSAGE value="lab2 work" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab2 work" />
   </component>
 </project>
