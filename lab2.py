@@ -1,87 +1,11 @@
 import math
 import logging
 import unittest
-class TestCalculateTriangle(unittest.TestCase):
-
-    # 1. Валидный разносторонний треугольник (классический египетский 3-4-5)
-    def test_scalene_triangle_valid(self):
-        t_type, coords = calculate_triangle("3", "4", "5")
-        self.assertEqual(t_type, "разносторонний")
-        # Проверяем, что координаты вписались в рамки 0..100
-        for x, y in coords:
-            self.assertTrue(0 <= x <= 100)
-            self.assertTrue(0 <= y <= 100)
-
-    # 2. Валидный равносторонний треугольник
-    def test_equilateral_triangle_valid(self):
-        t_type, coords = calculate_triangle("10", "10", "100")  # Ой, это тест на ошибку. Настоящий ниже:
-        t_type, coords = calculate_triangle("60", "60", "60")
-        self.assertEqual(t_type, "равносторонний")
-
-    # 3. Валидный равнобедренный треугольник
-    def test_isosceles_triangle_valid(self):
-        t_type, coords = calculate_triangle("5", "5", "3")
-        self.assertEqual(t_type, "равнобедренный")
-
-    # 4. Нечисловые данные на входе (буквы)
-    def test_invalid_string_input(self):
-        t_type, coords = calculate_triangle("abc", "10", "10")
-        self.assertEqual(t_type, "")
-        self.assertEqual(coords, [(-2, -2), (-2, -2), (-2, -2)])
-
-    # 5. Пустые строки на входе
-    def test_empty_string_input(self):
-        t_type, coords = calculate_triangle("", "5", "5")
-        self.assertEqual(t_type, "")
-        self.assertEqual(coords, [(-2, -2), (-2, -2), (-2, -2)])
-
-    # 6. Одна из сторон равна нулю
-    def test_zero_side(self):
-        t_type, coords = calculate_triangle("0", "5", "5")
-        self.assertEqual(t_type, "не треугольник")
-        self.assertEqual(coords, [(-1, -1), (-1, -1), (-1, -1)])
-
-    # 7. Одна из сторон отрицательная
-    def test_negative_side(self):
-        t_type, coords = calculate_triangle("5", "-5", "5")
-        self.assertEqual(t_type, "не треугольник")
-        self.assertEqual(coords, [(-1, -1), (-1, -1), (-1, -1)])
-
-    # 8. Нарушение неравенства треугольника (одна сторона слишком велика)
-    def test_invalid_triangle_inequality(self):
-        t_type, coords = calculate_triangle("1", "1", "10")
-        self.assertEqual(t_type, "не треугольник")
-        self.assertEqual(coords, [(-1, -1), (-1, -1), (-1, -1)])
-
-    # 9. Вырожденный треугольник (сумма двух сторон ровно равна третьей — отрезок)
-    def test_degenerate_triangle(self):
-        t_type, coords = calculate_triangle("5", "5", "10")
-        self.assertEqual(t_type, "не треугольник")
-        self.assertEqual(coords, [(-1, -1), (-1, -1), (-1, -1)])
-
-    # 10. Проверка float-значений в виде строк (например, с точкой)
-    def test_float_string_input(self):
-        t_type, coords = calculate_triangle("3.5", "4.5", "5.5")
-        self.assertEqual(t_type, "разносторонний")
-
-    # 11. Проверка границ масштабирования (минимум одна координата должна коснуться 0 и 100)
-    def test_bounding_box_edges(self):
-        _, coords = calculate_triangle("30", "40", "50")
-        all_x = [pt[0] for pt in coords]
-        all_y = [pt[1] for pt in coords]
-
-        # Так как масштаб идет по максимальной стороне, границы 0 и 100 должны быть достигнуты
-        self.assertTrue(min(all_x) == 0 or min(all_y) == 0)
-        self.assertTrue(max(all_x) == 100 or max(all_y) == 100)
 
 
-if __name__ == "__main__":
-    # Запуск юнит-тестов
-    unittest.main()
-
-# Настройка логирования
+# Настройка логирования: выводим уровень, имя функции и сообщение
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - [%(funcName)s] - %(message)s'
 )
 
@@ -93,15 +17,21 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
     logging.info("Старт обработки входных данных.")
     logging.debug(f"Полученные строки: A='{str_a}', B='{str_b}', C='{str_c}'")
 
-    # 1. Валидация типов данных
+    # 1. Валидация типов данных (ValueError + TypeError)
     try:
         a = float(str_a)
         b = float(str_b)
         c = float(str_c)
-        logging.info("Входные данные успешно приведены к типу float.")
-    except ValueError as e:
-        logging.error(f"Ошибка приведения типов (нечисловые данные): {e}")
+    except (ValueError, TypeError) as e:
+        logging.error(f"Ошибка приведения типов: {e}")
         return "", [(-2, -2), (-2, -2), (-2, -2)]
+
+    # 1.1 Проверка на nan / inf
+    if not (math.isfinite(a) and math.isfinite(b) and math.isfinite(c)):
+        logging.error("Обнаружены неконечные значения (nan/inf).")
+        return "", [(-2, -2), (-2, -2), (-2, -2)]
+
+    logging.info("Входные данные успешно приведены к типу float.")
 
     # 2. Проверка на положительные числа и существование треугольника
     if a <= 0 or b <= 0 or c <= 0:
@@ -112,10 +42,13 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
         logging.warning("Нарушено неравенство треугольника.")
         return "не треугольник", [(-1, -1), (-1, -1), (-1, -1)]
 
-    # 3. Определение вида треугольника
-    if a == b == c:
+    # 3. Определение вида треугольника (с math.isclose для устойчивости)
+    eps = 1e-9
+    if math.isclose(a, b, rel_tol=eps) and math.isclose(b, c, rel_tol=eps):
         triangle_type = "равносторонний"
-    elif a == b or b == c or a == c:
+    elif (math.isclose(a, b, rel_tol=eps)
+          or math.isclose(b, c, rel_tol=eps)
+          or math.isclose(a, c, rel_tol=eps)):
         triangle_type = "равнобедренный"
     else:
         triangle_type = "разносторонний"
@@ -123,13 +56,10 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
     logging.info(f"Определен вид треугольника: {triangle_type}")
 
     # 4. Расчет координат вершин
-    # Вершина 1: (0, 0)
-    # Вершина 2: (c, 0) - лежит на оси X, длина стороны = c
-    # Вершина 3: рассчет через угол Alpha (между сторонами b и c, напротив стороны a)
     try:
         cos_alpha = (b ** 2 + c ** 2 - a ** 2) / (2 * b * c)
         cos_alpha = max(-1.0, min(1.0, cos_alpha))
-        sin_alpha = math.sqrt(1.0 - cos_alpha ** 2)
+        sin_alpha = math.sin(math.acos(cos_alpha))
 
         x1, y1 = 0.0, 0.0
         x2, y2 = float(c), 0.0
@@ -138,7 +68,7 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
         logging.error(f"Непредвиденная математическая ошибка: {e}")
         return "не треугольник", [(-1, -1), (-1, -1), (-1, -1)]
 
-    # 5. Масштабирование под поле 100x100 px с сохранением пропорций
+    # 5. Масштабирование под поле 100x100 px
     min_x = min(x1, x2, x3)
     max_x = max(x1, x2, x3)
     min_y = min(y1, y2, y3)
@@ -146,15 +76,13 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
 
     width = max_x - min_x
     height = max_y - min_y
-
     max_dim = max(width, height)
+
     scale = 100.0 / max_dim if max_dim > 0 else 1.0
 
     def fit(x, y):
-        # Центрирование по меньшей стороне
         offset_x = (100.0 - width * scale) / 2
         offset_y = (100.0 - height * scale) / 2
-
         new_x = int(round((x - min_x) * scale + offset_x))
         new_y = int(round((y - min_y) * scale + offset_y))
         return new_x, new_y
@@ -163,4 +91,170 @@ def calculate_triangle(str_a: str, str_b: str, str_c: str):
     v2_res = fit(x2, y2)
     v3_res = fit(x3, y3)
 
-    return triangle_type, [v1_res, v2_res, v3_res]
+    coordinates = [v1_res, v2_res, v3_res]
+    logging.info(f"Вычисления успешно завершены. Результат: {coordinates}")
+
+    return triangle_type, coordinates
+
+
+# ТЕСТЫ
+class TestCalculateTriangle(unittest.TestCase):
+
+    # ---------- 1. Валидация входных данных ----------
+
+    def test_01_non_numeric_returns_empty_string_and_minus_two(self):
+        """Нечисловые данные → пустая строка и точки (-2,-2)."""
+        t, coords = calculate_triangle("abc", "10", "10")
+        self.assertEqual(t, "")
+        self.assertEqual(coords, [(-2, -2), (-2, -2), (-2, -2)])
+
+    def test_02_empty_string_returns_empty(self):
+        """Пустая строка → ошибка типа данных."""
+        t, coords = calculate_triangle("", "5", "5")
+        self.assertEqual(t, "")
+        self.assertEqual(coords, [(-2, -2)] * 3)
+
+    def test_03_none_returns_empty(self):
+        """None → TypeError должен быть перехвачен."""
+        t, coords = calculate_triangle(None, "5", "5")
+        self.assertEqual(t, "")
+        self.assertEqual(coords, [(-2, -2)] * 3)
+
+    def test_04_nan_returns_empty(self):
+        """nan не должен проходить валидацию."""
+        t, coords = calculate_triangle("nan", "5", "5")
+        self.assertEqual(t, "")
+        self.assertEqual(coords, [(-2, -2)] * 3)
+
+    def test_05_inf_returns_empty(self):
+        """inf не должен проходить валидацию."""
+        t, coords = calculate_triangle("inf", "5", "5")
+        self.assertEqual(t, "")
+        self.assertEqual(coords, [(-2, -2)] * 3)
+
+    def test_06_negative_side(self):
+        """Отрицательная сторона → не треугольник."""
+        t, coords = calculate_triangle("-3", "4", "5")
+        self.assertEqual(t, "не треугольник")
+        self.assertEqual(coords, [(-1, -1)] * 3)
+
+    def test_07_zero_side(self):
+        """Нулевая сторона → не треугольник."""
+        t, coords = calculate_triangle("0", "4", "5")
+        self.assertEqual(t, "не треугольник")
+        self.assertEqual(coords, [(-1, -1)] * 3)
+
+    # ---------- 2. Неравенство треугольника ----------
+
+    def test_08_violates_inequality_a_plus_b(self):
+        """a + b < c → не треугольник."""
+        t, coords = calculate_triangle("3", "4", "100")
+        self.assertEqual(t, "не треугольник")
+
+    def test_09_violates_inequality_a_plus_c(self):
+        """a + c < b → не треугольник."""
+        t, coords = calculate_triangle("3", "100", "4")
+        self.assertEqual(t, "не треугольник")
+
+    def test_10_violates_inequality_b_plus_c(self):
+        """b + c < a → не треугольник."""
+        t, coords = calculate_triangle("100", "3", "4")
+        self.assertEqual(t, "не треугольник")
+
+    def test_11_degenerate_triangle_equal_sum(self):
+        """a + b == c → вырожденный, не треугольник."""
+        t, coords = calculate_triangle("3", "4", "7")
+        self.assertEqual(t, "не треугольник")
+
+    # ---------- 3. Определение типа ----------
+
+    def test_12_equilateral(self):
+        """Равносторонний треугольник."""
+        t, _ = calculate_triangle("10", "10", "10")
+        self.assertEqual(t, "равносторонний")
+
+    def test_13_isosceles_ab(self):
+        """Равнобедренный: a == b."""
+        t, _ = calculate_triangle("5", "5", "6")
+        self.assertEqual(t, "равнобедренный")
+
+    def test_14_isosceles_bc(self):
+        """Равнобедренный: b == c."""
+        t, _ = calculate_triangle("6", "5", "5")
+        self.assertEqual(t, "равнобедренный")
+
+    def test_15_isosceles_ac(self):
+        """Равнобедренный: a == c."""
+        t, _ = calculate_triangle("5", "6", "5")
+        self.assertEqual(t, "равнобедренный")
+
+    def test_16_scalene(self):
+        """Разносторонний треугольник."""
+        t, _ = calculate_triangle("3", "4", "5")
+        self.assertEqual(t, "разносторонний")
+
+    def test_17_equilateral_float_artifact(self):
+        """Почти равные стороны из-за float-погрешности → равносторонний."""
+        t, _ = calculate_triangle("3", "3", "3.0000000000000004")
+        self.assertEqual(t, "равносторонний")
+
+    # ---------- 4. Координаты ----------
+
+    def test_18_coordinates_within_bounds(self):
+        """Все координаты в диапазоне [0, 100]."""
+        _, coords = calculate_triangle("3", "4", "5")
+        for (x, y) in coords:
+            self.assertGreaterEqual(x, 0)
+            self.assertLessEqual(x, 100)
+            self.assertGreaterEqual(y, 0)
+            self.assertLessEqual(y, 100)
+
+    def test_19_three_distinct_points(self):
+        """Три вершины не совпадают."""
+        _, coords = calculate_triangle("3", "4", "5")
+        self.assertEqual(len(set(coords)), 3)
+
+    def test_20_bbox_fills_one_axis(self):
+        """Одна из осей должна занимать 100 px."""
+        _, coords = calculate_triangle("3", "4", "5")
+        xs = [p[0] for p in coords]
+        ys = [p[1] for p in coords]
+        self.assertEqual(max(max(xs) - min(xs), max(ys) - min(ys)), 100)
+
+    def test_21_equilateral_symmetric(self):
+        """Равносторонний треугольник симметричен относительно центра."""
+        _, coords = calculate_triangle("10", "10", "10")
+        top = min(coords, key=lambda p: p[1])  # минимальный Y = верх
+        bottom_points = [p for p in coords if p != top]
+        if len(bottom_points) == 2:
+            mid_x = (bottom_points[0][0] + bottom_points[1][0]) / 2
+            self.assertAlmostEqual(top[0], mid_x, delta=1)
+
+    def test_22_large_values_scaled(self):
+        """Очень большие стороны → всё равно 0..100."""
+        _, coords = calculate_triangle("10000", "10000", "10000")
+        for (x, y) in coords:
+            self.assertTrue(0 <= x <= 100 and 0 <= y <= 100)
+
+    def test_23_small_values_scaled(self):
+        """Очень маленькие стороны → масштабируются."""
+        _, coords = calculate_triangle("0.001", "0.001", "0.001")
+        for (x, y) in coords:
+            self.assertTrue(0 <= x <= 100 and 0 <= y <= 100)
+        xs = [p[0] for p in coords]
+        ys = [p[1] for p in coords]
+        self.assertEqual(max(max(xs) - min(xs), max(ys) - min(ys)), 100)
+
+
+
+if __name__ == "__main__":
+    # Демонстрация работы функции
+    print("ДЕМОНСТРАЦИЯ РАБОТЫ ФУНКЦИИ")
+    for args in [("30", "40", "50"), ("10", "10", "100"), ("abc", "10", "10")]:
+        t, coords = calculate_triangle(*args)
+        print(f"calculate_triangle{args} -> Тип: {t!r}, Координаты: {coords}")
+    print()
+
+    # Запуск юнит-тестов
+    print("ЗАПУСК ЮНИТ-ТЕСТОВ")
+    unittest.main(argv=["first-arg-is-ignored"], verbosity=2, exit=False)
